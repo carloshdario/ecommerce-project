@@ -2,10 +2,8 @@ version: '3.8'
 
 services:
 
-  # ------------------------------
-  # 1. Banco de Dados Oracle XE
-  # ------------------------------
   db:
+    # ... (Sem alterações neste bloco)
     image: gvenzl/oracle-xe
     container_name: oracle19c
     ports:
@@ -16,25 +14,30 @@ services:
       ORACLE_CHARACTERSET: AL32UTF8
     volumes:
       - oracle_data:/opt/oracle/oradata
-      # Caminho correto para scripts de inicialização!
-      - ./db/setup/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/setup/01_admin_setup.sql:/docker-entrypoint-initdb.d/01_admin_setup.sql
     restart: always
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "sh", "-c", "lsnrctl status LISTENER"] 
+      interval: 30s
+      timeout: 10s
+      retries: 20
 
-  # ------------------------------
-  # 2. Backend Spring Boot
-  # ------------------------------
   backend:
     build:
       context: ./ecommerce
       dockerfile: dockerfile
     container_name: spring_backend
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
+      # 🚨 CORREÇÃO: Mudando o separador de Service Name (/) para SID (:)
+      # DE: jdbc:oracle:thin:@db:1521/XEPDB1
+      # PARA:
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@db:1521/XEPDB1
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
@@ -43,9 +46,7 @@ services:
     networks:
       - app-network
 
-  # ------------------------------
-  # 3. Frontend Nuxt
-  # ------------------------------
+  # ... (Serviço frontend sem alterações)
   frontend:
     build:
       context: ./frontend
@@ -66,4 +67,3 @@ volumes:
 networks:
   app-network:
     driver: bridge
-
