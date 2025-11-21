@@ -1,0 +1,38 @@
+# frontend/Dockerfile
+
+# ----------------------------------------------------
+# 1. ESTÁGIO DE BUILD
+# ----------------------------------------------------
+FROM node:14-alpine AS build
+# 🚨 AJUSTE 1: Usa a raiz do app como WORKDIR
+WORKDIR /app 
+
+# Copia e instala as dependências para aproveitar o cache
+# 🚨 AJUSTE 2: Copia os arquivos de DEPENDÊNCIA da subpasta 'ecommerce/' para /app/
+COPY ecommerce/package.json ecommerce/package-lock.json ./ 
+RUN npm install
+
+# Copia o restante do código fonte e constrói o Nuxt
+# 🚨 AJUSTE 3: Copia o restante do código fonte de 'ecommerce/' para /app/
+COPY ecommerce/ . 
+RUN npm run build
+
+# ----------------------------------------------------
+# 2. ESTÁGIO DE EXECUÇÃO (Runtime)
+# ----------------------------------------------------
+FROM node:14-alpine
+WORKDIR /app
+
+# Copia os arquivos essenciais de produção do estágio de build
+# 🚨 AJUSTE 4: Os caminhos de ORIGEM agora são /app/ (raiz do estágio de build)
+COPY --from=build /app/.nuxt/ ./.nuxt/
+COPY --from=build /app/node_modules/ ./node_modules/
+# Mantido, mas deve existir na sua pasta local (ecommerce/static/):
+COPY --from=build /app/static/ ./static/ 
+COPY --from=build /app/package.json . 
+
+# Variável de Ambiente para o Nuxt/Axios (lida pelo Nuxt)
+ENV API_URL=http://backend:8080/api
+
+EXPOSE 3000
+CMD [ "npm", "start" ]

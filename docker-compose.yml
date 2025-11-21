@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+
+  # ------------------------------
+  # 1. Banco de Dados Oracle XE
+  # ------------------------------
+  db:
+    image: gvenzl/oracle-xe
+    container_name: oracle19c
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    environment:
+      ORACLE_PASSWORD: 21221
+      ORACLE_CHARACTERSET: AL32UTF8
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      # Caminho correto para scripts de inicialização!
+      - ./db/setup/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    networks:
+      - app-network
+
+  # ------------------------------
+  # 2. Backend Spring Boot
+  # ------------------------------
+  backend:
+    build:
+      context: ./ecommerce
+      dockerfile: dockerfile
+    container_name: spring_backend
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@db:1521/XEPDB1
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      APP_JWT_SECRET: MinhaChaveSuperSecreta123
+      SPRING_APPLICATION_NAME: ecommerce
+    networks:
+      - app-network
+
+  # ------------------------------
+  # 3. Frontend Nuxt
+  # ------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: nuxt_frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      NUXT_ENV_API_URL: http://backend:8080/api
+    networks:
+      - app-network
+
+volumes:
+  oracle_data:
+
+networks:
+  app-network:
+    driver: bridge
+
