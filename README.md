@@ -28,7 +28,6 @@ O projeto é configurado para ser iniciado com um único comando, garantindo que
 ### Pré-requisitos
 
 - Docker e Docker Compose instalados  
-- Memória RAM: O Oracle 19c XE exige **mínimo de 4GB de RAM** dedicados ao Docker para inicializar corretamente
 
 ### Passos para Subir o Projeto
 
@@ -36,18 +35,20 @@ O projeto é configurado para ser iniciado com um único comando, garantindo que
 
 ```bash
 cd ecommerce-project/
-
+```
 Execute o comando para construir as imagens e iniciar os containers:
 
-sudo docker compose up --build
+```bash
+sudo docker compose up --build ou docker compose up --build
+```
 
 ⚠️ Observação: A inicialização do container Oracle é o passo mais demorado (3 a 5 minutos na primeira vez), pois ele descompacta a imagem e executa o init.sql. O Backend aguardará o DB estar pronto.
 
 🔗 URLs e Credenciais
-Descrição	Endereço / Valor
 Aplicação Frontend	http://localhost:3000
 API Backend (Base)	http://localhost:8080/api
 Credencial Padrão (Exemplo)	username: admin
 password: 123456
 Porem para realizar uma compra sera necessario criar uma conta de usuario comum.
+
 
