@@ -45,10 +45,12 @@ sudo docker compose up --build ou docker compose up --build
 ⚠️ Observação: A inicialização do container Oracle é o passo mais demorado (3 a 5 minutos na primeira vez), pois ele descompacta a imagem e executa o init.sql. O Backend aguardará o DB estar pronto.
 
 🔗 URLs e Credenciais
-Aplicação Frontend	http://localhost:3000
-API Backend (Base)	http://localhost:8080/api
-Credencial Padrão (Exemplo)	username: admin
+Aplicação Frontend -> http://localhost:3000
+API Backend -> http://localhost:8080/api
+
+Credencial Padrão:
+username: admin
 password: 123456
-Porem para realizar uma compra sera necessario criar uma conta de usuario comum.
+Obs:Para realizar uma compra sera necessario criar uma conta de usuario comum.
 
 
